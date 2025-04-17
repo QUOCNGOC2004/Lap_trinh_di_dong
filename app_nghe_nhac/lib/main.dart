@@ -1,3 +1,4 @@
+import 'package:app_nghe_nhac/controller/playlist_provider.dart';
 import 'package:app_nghe_nhac/controller/song_provider.dart';
 import 'package:app_nghe_nhac/firebase_options.dart';
 import 'package:app_nghe_nhac/view/CaNhan.dart';
@@ -15,14 +16,19 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => SongProvider(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => SongProvider()),
+        ChangeNotifierProvider(create: (context) => PlaylistProvider()),
+      ],
       child: MyApp(),
     ),
   );
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -33,6 +39,8 @@ class MyApp extends StatelessWidget {
 }
 
 class AppMusic extends StatefulWidget {
+  const AppMusic({super.key});
+
   @override
   AppMusicState createState() => AppMusicState();
 }
@@ -45,7 +53,7 @@ class AppMusicState extends State<AppMusic> {
     ThuVien(), // Thư viện (Mặc định)
     ArtistScreen(), // Nghệ sĩ
     BaiHat(), // Bài hát
-    CaNhanScreen(),  
+    CaNhanScreen(),
   ];
 
   @override

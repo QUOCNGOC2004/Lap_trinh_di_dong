@@ -5,6 +5,7 @@ class Songs extends StatelessWidget {
   final String ngheSi;
   final VoidCallback onMorePressed;
   final VoidCallback onTap;
+  final bool isFavorite;
 
   const Songs({
     Key? key,
@@ -12,6 +13,7 @@ class Songs extends StatelessWidget {
     required this.ngheSi,
     required this.onMorePressed,
     required this.onTap,
+    this.isFavorite = false,
   }) : super(key: key);
 
   @override
@@ -26,15 +28,15 @@ class Songs extends StatelessWidget {
             color: Colors.grey[900],
             borderRadius: BorderRadius.circular(5),
           ),
-          child: Icon(Icons.music_note, color: Colors.white),
+          child: Icon(isFavorite ? Icons.favorite : Icons.music_note, color: const Color.fromARGB(255, 224, 100, 121)),
         ),
         title: Text(
           title,
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16),
         ),
         subtitle: Text(
           ngheSi,
-          style: TextStyle(color: Colors.black87),
+          style: TextStyle(color: const Color.fromARGB(221, 255, 255, 255), fontSize: 14),
         ),
         trailing: IconButton(
           icon: Icon(Icons.more_vert, color: Colors.black),

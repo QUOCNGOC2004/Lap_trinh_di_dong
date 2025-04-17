@@ -5,8 +5,10 @@ import 'package:app_nghe_nhac/view/widgetsForBaiHat/Songs.dart';
 import 'package:app_nghe_nhac/view/widgetsForThuVien/more_options.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+// giao diện danh sachs bài hát
 class BaiHat extends StatefulWidget {
+  const BaiHat({super.key});
+
   @override
   _BaiHatState createState() => _BaiHatState();
 }
@@ -85,9 +87,9 @@ class _BaiHatState extends State<BaiHat> {
                   itemBuilder: (context, index) {
                     return Songs(
                       title: songProvider.songs[index]['title']!,
-                      ngheSi: "Không xác định - Download",
+                      ngheSi: songProvider.songs[index]['ngheSi']??'Không rõ nghệ sĩ',  
                       onMorePressed: () {
-                        print("Nhấn vào nút more");
+                        //print("Nhấn vào nút more");
                       },
                       onTap: () {
                         Provider.of<SongProvider>(context, listen: false).playFromIndex(index);

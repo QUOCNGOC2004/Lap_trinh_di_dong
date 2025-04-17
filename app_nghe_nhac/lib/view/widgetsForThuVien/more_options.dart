@@ -1,3 +1,5 @@
+import 'package:app_nghe_nhac/controller/navigation_controller.dart';
+import 'package:app_nghe_nhac/view/CaNhan.dart';
 import 'package:flutter/material.dart';
 
 void showMoreOptions(BuildContext context) {
@@ -14,7 +16,7 @@ void showMoreOptions(BuildContext context) {
               title: Text("Sắp xếp theo"),
               onTap: () {
                 Navigator.pop(context);
-                print("Sắp xếp theo...");
+                //print("Sắp xếp theo...");
               },
             ),
             ListTile(
@@ -22,15 +24,15 @@ void showMoreOptions(BuildContext context) {
               title: Text("Quản lý bài hát"),
               onTap: () {
                 Navigator.pop(context);
-                print("Quản lý bài hát...");
+                //print("Quản lý bài hát...");
               },
             ),
             ListTile(
               leading: Icon(Icons.settings),
               title: Text("Cài đặt"),
               onTap: () {
-                Navigator.pop(context);
-                print("Cài đặt...");
+                NavigationController.navigateTo(context, CaNhanScreen());
+                //print("Cài đặt...");
               },
             ),
           ],

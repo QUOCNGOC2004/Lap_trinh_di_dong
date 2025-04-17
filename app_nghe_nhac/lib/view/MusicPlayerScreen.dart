@@ -2,8 +2,12 @@ import 'package:app_nghe_nhac/controller/song_provider.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
+//giao diện nghe nhạc chính
 class MusicPlayerScreen extends StatefulWidget {
+  const MusicPlayerScreen({super.key});
+
   @override
   _MusicPlayerScreenState createState() => _MusicPlayerScreenState();
 }
@@ -12,31 +16,37 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   AudioPlayer get _audioPlayer => SongProvider.audioPlayer;
   Duration _currentPosition = Duration.zero;
   Duration _totalDuration = Duration.zero;
-  int repeatMode = 0; // 0: Lặp lại danh sách, 1: Lặp lại bài hát, 2: Phát ngẫu nhiên
+
+  StreamSubscription<Duration>? _positionSubscription;
+  StreamSubscription<Duration>? _durationSubscription;
 
   void initState() {
     super.initState();
 
     // Lắng nghe tiến trình bài hát
-  _audioPlayer.onPositionChanged.listen((position) {
-    print("Thời gian hiện tại: ${position.inSeconds} giây");
-    setState(() {
-      _currentPosition = position;
+    _positionSubscription = _audioPlayer.onPositionChanged.listen((position) {
+      if (mounted) {
+        //print("Thời gian hiện tại: ${position.inSeconds} giây");
+        setState(() {
+          _currentPosition = position;
+        });
+      }
     });
-  });
 
-  // Lắng nghe tổng thời gian bài hát
-  _audioPlayer.onDurationChanged.listen((duration) {
-    print("Tổng thời gian bài hát: ${duration.inSeconds} giây");
-    setState(() {
-      _totalDuration = duration;
+    // Lắng nghe tổng thời gian bài hát
+    _durationSubscription = _audioPlayer.onDurationChanged.listen((duration) {
+      if (mounted) {
+        //print("Tổng thời gian bài hát: ${duration.inSeconds} giây");
+        setState(() {
+          _totalDuration = duration;
+        });
+      }
     });
-  });
   }
 
   void toggleRepeatMode() {
     setState(() {
-      repeatMode = (repeatMode + 1) % 3;
+      SongProvider.repeatMode = (SongProvider.repeatMode + 1) % 3;
     });
   }
 
@@ -48,12 +58,21 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
   }
 
   @override
+  void dispose() {
+    _positionSubscription?.cancel();
+    _durationSubscription?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var songProvider = Provider.of<SongProvider>(context);
-    var currentSong = songProvider.songs[songProvider.currentIndex];
+    var currentSong = songProvider.isPlayingFavorites
+        ? songProvider.favoriteSongs[songProvider.currentIndex]
+        : songProvider.songs[songProvider.currentIndex];
 
     return Scaffold(
-      backgroundColor: const Color.fromARGB(255, 0, 0, 0),
+      backgroundColor: const Color.fromARGB(255, 15, 89, 103),
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 138, 135, 135),
         elevation: 0,
@@ -66,7 +85,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
           IconButton(
             icon: Icon(Icons.more_vert, color: Colors.white),
             onPressed: () {
-              print("Nhấn vào nút ba chấm");
+              //print("Nhấn vào nút ba chấm");
             },
           ),
         ],
@@ -79,10 +98,13 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
             width: 250,
             height: 250,
             decoration: BoxDecoration(
-              color: Colors.red,
               borderRadius: BorderRadius.circular(20),
+              image: DecorationImage(
+                image: AssetImage(
+                    'image/disc.jpg'), // Ảnh đĩa nhạc (disc.png)
+                fit: BoxFit.cover, 
+              ),
             ),
-            child: Icon(Icons.music_note, color: Colors.white, size: 100),
           ),
           SizedBox(height: 20),
 
@@ -92,7 +114,7 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
                 color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
           ),
           Text(
-            "Không xác định",
+            currentSong['ngheSi'] ?? 'Không rõ nghệ sĩ',
             style: TextStyle(color: Colors.grey, fontSize: 16),
           ),
           SizedBox(height: 20),
@@ -143,9 +165,9 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
             children: [
               IconButton(
                 icon: Icon(
-                  repeatMode == 0
+                  SongProvider.repeatMode == 0
                       ? Icons.repeat
-                      : repeatMode == 1
+                      : SongProvider.repeatMode == 1
                           ? Icons.repeat_one
                           : Icons.shuffle,
                   color: Colors.white,
@@ -155,17 +177,29 @@ class _MusicPlayerScreenState extends State<MusicPlayerScreen> {
               ),
               SizedBox(width: 60),
               IconButton(
-                icon:
-                    Icon(Icons.favorite_border, color: Colors.white, size: 30),
+                icon: Icon(
+                  songProvider.isFavorite(currentSong)
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  color: Colors.white,
+                  size: 30,
+                ),
                 onPressed: () {
-                  print("Nhấn vào yêu thích");
+                  songProvider.toggleFavorite(currentSong, context);
+                  if (songProvider.isPlayingFavorites == true &&
+                      songProvider.favoriteSongs.isEmpty) {
+                    songProvider.playFromIndex(0);
+                  } else if (songProvider.isPlayingFavorites == true &&
+                      songProvider.songs.isNotEmpty) {
+                    songProvider.nextSong();
+                  }
                 },
               ),
               SizedBox(width: 60),
               IconButton(
                 icon: Icon(Icons.queue_music, color: Colors.white, size: 30),
                 onPressed: () {
-                  print("Nhấn vào danh sách phát");
+                  //print("Nhấn vào danh sách phát");
                 },
               ),
             ],
